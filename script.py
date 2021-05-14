@@ -1,4 +1,4 @@
-import os
+import os, time
 import json
 import datetime
 import cfg
@@ -11,8 +11,9 @@ test_dates = [date_1, date_2, date_3]
 
 def work():
     while True:
-        cont = input("Continue?")
-        if(not cont):break
+        # cont = input("Continue?")
+        # if(not cont):break
+        time.sleep(60)
 
 
         for test_date in test_dates:
@@ -47,7 +48,7 @@ def work():
 
 
                 if(availability == 0):      # Just for testing
-                    notify()
+                    notify(name)
 
                 oh.write("Center Name")
                 oh.write("\t")
@@ -78,9 +79,11 @@ def work():
             oh.close()
 
 
-def notify():
+def notify(center_name):
+    sysStr = 'notify-send' + ' "' + center_name + ' || Slot Available!!" -i "/home/death0hole/Desktop/CoWin/syringe.jpg" -u critical'
     os.system('amixer -D pulse sset Master 100%')
-    os.system('notify-send "Slot Available!!" -i "/home/death0hole/Desktop/CoWin/syringe.jpg" -u critical')
+    os.system(sysStr)
+    os.system("aplay /home/death0hole/Desktop/CoWin/alert.wav -q")
     os.system("aplay /home/death0hole/Desktop/CoWin/alert.wav -q")
 
 
