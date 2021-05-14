@@ -11,7 +11,7 @@ Install them if you don't have them with you.
 
 ## Requirements
 -   A stable internet connection
--   Linux Desktop (Tested on Ubuntu 20.10)
+-   Linux-based OS (Tested on Ubuntu 20.10)
 
 ## Running
 ```python3 script.py``` on your terminal window
