@@ -1,6 +1,7 @@
 import os
 import json
 import datetime
+import cfg
 
 date_1 = datetime.datetime.now().strftime("%d-%m-%Y")
 date_2 = (datetime.datetime.now() + datetime.timedelta(days=1)).strftime("%d-%m-%Y")
@@ -15,7 +16,7 @@ while True:
 
     for test_date in test_dates:
         print(test_date)
-        curl_command = "curl -o jsonHolder.json -X GET  -H \"User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.95 Safari/537.36\"  \"https://cdn-api.co-vin.in/api/v2/appointment/sessions/public/calendarByPin?pincode=457001&date=" + test_date + "\""
+        curl_command = "curl -o jsonHolder.json -X GET  -H \"User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.95 Safari/537.36\"  \"https://cdn-api.co-vin.in/api/v2/appointment/sessions/public/calendarByPin?pincode=" + str(cfg.constants['pin']) + "&date=" + test_date + "\""
         os.system(curl_command)
 
         fhAux = open('jsonHolder.json')
@@ -45,6 +46,7 @@ while True:
 
 
             if(availability == 0):      # Just for testing
+                os.system('amixer -D pulse sset Master 100%')
                 os.system('notify-send "Slot Available!!" -i "/home/death0hole/Desktop/CoWin/syringe.jpg" -u critical')
                 os.system("aplay /home/death0hole/Desktop/CoWin/alert.wav -q")
 
