@@ -1,15 +1,22 @@
+import json
 from pynotifier import Notification
 import pathlib, os
 import playsound
-import cfg
+
 try:
     from win10toast import ToastNotifier
 except:
     pass
 
 class Notifier:
+    config_data = {}
+
+    def __init__(self):
+        with open('config.json') as fh:
+            self.config_data = json.loads(fh.read())
+
     def notify(self, head, msg):
-        if(cfg.constants['linux_win'] == 'linux'):
+        if(self.config_data['linux_win'] == 'linux'):
             self.linux_notify(head, msg)
         else:
             self.win_notify(head, msg)

@@ -2,21 +2,26 @@ import urllib.request, urllib.parse, urllib.request
 import os, time
 import json
 import datetime
-import cfg
+from yaml.loader import Loader
 from notifier import Notifier
 
-date_1 = datetime.datetime.now().strftime("%d-%m-%Y")
-date_2 = (datetime.datetime.now() + datetime.timedelta(days=1)).strftime("%d-%m-%Y")
-date_3 = (datetime.datetime.now() + datetime.timedelta(days=2)).strftime("%d-%m-%Y")
-
-test_dates = [date_1, date_2, date_3]
-
-
 class CoWin_alerts:
+    test_dates = []
+    config_data = {}
+
+    def __init__(self):
+        date_1 = datetime.datetime.now().strftime("%d-%m-%Y")
+        date_2 = (datetime.datetime.now() + datetime.timedelta(days=1)).strftime("%d-%m-%Y")
+        date_3 = (datetime.datetime.now() + datetime.timedelta(days=2)).strftime("%d-%m-%Y")
+        self.test_dates = [date_1, date_2, date_3]
+        with open('config.json') as fh:
+            self.config_data = json.loads(fh.read())
+        # print(self.config_data)
+
     def request_data(self, date):
         service_url = "https://cdn-api.co-vin.in/api/v2/appointment/sessions/public/calendarByPin?"
         params = {
-            'pincode': cfg.constants['pin'],
+            'pincode': self.config_data['pin'],
             'date': date
         }
 
@@ -37,8 +42,8 @@ class CoWin_alerts:
             # if(not cont):break
             # time.sleep(5)
 
-            for test_date in test_dates:
-                print(test_date)
+            for test_date in self.test_dates:
+                # print(test_date)
                 jsonStr = self.request_data(test_date)
                 json_data = json.loads(jsonStr)
 
@@ -84,13 +89,5 @@ class CoWin_alerts:
 
 
 if __name__ == '__main__':
-    # work()
-    # print(request_data('15-05-2021'))
-    # notify("Nihar")
-    # from pynotifier import Notification
-    # notify("Vaccine Slot Available", "Yaayy")
-    # win_notify("hi Mudit")
-    n = Notifier()
-    n.notify("Slot", "Hi")
-    pass
-    
+    obj = CoWin_alerts()
+    obj.work()
