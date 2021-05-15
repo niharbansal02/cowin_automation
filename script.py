@@ -4,7 +4,6 @@ import json
 import datetime
 import cfg
 
-service_url = "https://cdn-api.co-vin.in/api/v2/appointment/sessions/public/calendarByPin?"
 
 date_1 = datetime.datetime.now().strftime("%d-%m-%Y")
 date_2 = (datetime.datetime.now() + datetime.timedelta(days=1)).strftime("%d-%m-%Y")
@@ -12,7 +11,9 @@ date_3 = (datetime.datetime.now() + datetime.timedelta(days=2)).strftime("%d-%m-
 
 test_dates = [date_1, date_2, date_3]
 
+
 def request_data(date):
+    service_url = "https://cdn-api.co-vin.in/api/v2/appointment/sessions/public/calendarByPin?"
     params = {
         'pincode': cfg.constants['pin'],
         'date': date
