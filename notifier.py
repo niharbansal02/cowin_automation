@@ -2,6 +2,10 @@ from pynotifier import Notification
 import pathlib, os
 import playsound
 import cfg
+try:
+    from win10toast import ToastNotifier
+except:
+    pass
 
 class Notifier:
     def notify(self, head, msg):
@@ -11,7 +15,6 @@ class Notifier:
             self.win_notify(head, msg)
 
     def win_notify(self, head, msg):
-        from win10toast import ToastNotifier
         toast = ToastNotifier()
         toast.show_toast(head, msg, duration=20, icon_path="syringe.ico")
         playsound.playsound('alert.wav')

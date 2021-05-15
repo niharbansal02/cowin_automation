@@ -62,7 +62,8 @@ def work():
 
                 # if(availability == 0):      # Just for testing
                 if(availability > 0):
-                    notify(name)
+                    notifObj = Notifier()
+                    notifObj.notify("!! Slot Available !!", name)
 
                 oh.write("Center Name")
                 oh.write("\t")
