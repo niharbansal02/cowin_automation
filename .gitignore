@@ -4,4 +4,5 @@ aux.json
 jsonHolder.json
 json.json
 further_devs.py
-__pycache__
+__pycache__temp.py
+temp.py
