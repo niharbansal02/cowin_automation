@@ -2,7 +2,6 @@ import urllib.request, urllib.parse, urllib.request
 import os, time
 import json
 import datetime
-from yaml.loader import Loader
 from notifier import Notifier
 
 class CoWin_alerts:
