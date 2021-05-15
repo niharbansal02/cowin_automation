@@ -3,9 +3,7 @@ import os, time
 import json
 import datetime
 import cfg
-from pynotifier import Notification
-import pathlib
-import playsound
+from notifier import Notifier
 
 date_1 = datetime.datetime.now().strftime("%d-%m-%Y")
 date_2 = (datetime.datetime.now() + datetime.timedelta(days=1)).strftime("%d-%m-%Y")
@@ -13,12 +11,6 @@ date_3 = (datetime.datetime.now() + datetime.timedelta(days=2)).strftime("%d-%m-
 
 test_dates = [date_1, date_2, date_3]
 
-def win_notify(msg):
-    from win10toast import ToastNotifier
-    toast = ToastNotifier()
-    toast.show_toast("Slot Availaible!!", msg, duration=20, icon_path="syringe.ico")
-    playsound.playsound('alert.wav')
-    playsound.playsound('alert.wav')
 
 def request_data(date):
     service_url = "https://cdn-api.co-vin.in/api/v2/appointment/sessions/public/calendarByPin?"
@@ -102,22 +94,6 @@ def work():
 
         time.sleep(60)
 
-def notify(head, msg):
-    current = pathlib.Path(__file__).parent.absolute()
-
-    Notification(
-        title=head,
-        description=msg,
-        duration=5,  
-        icon_path=os.path.join(current, 'syringe.png'),
-        urgency='critical'
-    ).send()
-
-    playsound.playsound('alert.wav')
-    playsound.playsound('alert.wav')
-
-    # os.system("aplay /home/death0hole/Desktop/CoWin/alert.wav -q")
-    # os.system("aplay /home/death0hole/Desktop/CoWin/alert.wav -q")
 
 
 if __name__ == '__main__':
@@ -126,6 +102,8 @@ if __name__ == '__main__':
     # notify("Nihar")
     # from pynotifier import Notification
     # notify("Vaccine Slot Available", "Yaayy")
-    win_notify("hi Mudit")
-  
+    # win_notify("hi Mudit")
+    n = Notifier()
+    n.notify("Slot", "Hi")
+    pass
     
