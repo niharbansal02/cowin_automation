@@ -13,7 +13,7 @@ def work():
     while True:
         # cont = input("Continue?")
         # if(not cont):break
-        time.sleep(60)
+        time.sleep(5)
 
 
         for test_date in test_dates:
@@ -48,6 +48,7 @@ def work():
 
 
                 if(availability == 0):      # Just for testing
+                # if(availability > 0):
                     notify(name)
 
                 oh.write("Center Name")
