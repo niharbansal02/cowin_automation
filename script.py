@@ -42,9 +42,13 @@ class CoWin_alerts:
             # time.sleep(5)
 
             for test_date in self.test_dates:
-                # print(test_date)
-                jsonStr = self.request_data(test_date)
-                json_data = json.loads(jsonStr)
+                print(test_date)
+                try:
+                    jsonStr = self.request_data(test_date)
+                    json_data = json.loads(jsonStr)
+                except:
+                    print("HTTP 403: It's not me, it's the Government")
+                    continue
 
                 try:
                     aux_var = (json_data['centers'][0])
@@ -64,20 +68,20 @@ class CoWin_alerts:
                     vaccine = center['sessions'][0]['vaccine']
 
 
-                    # if(availability == 0):      # Just for testing
-                    if(availability > 0):
+                    if(availability == 0):      # Just for testing
+                    # if(availability > 0):
                         notifObj = Notifier()
                         notifObj.notify("!! Slot Available !!", name)
 
                     self.write_in_file(oh, "Center Name", name)
-                    self.write_in_file(oh, "Availability", availability)
+                    self.write_in_file(oh, "Availability", str(availability))
                     self.write_in_file(oh, "Date", date)
                     self.write_in_file(oh, "Vaccine", vaccine)
-                    self.write_in_file(oh, "Min Age", min_age)
+                    self.write_in_file(oh, "Min Age", str(min_age))
 
                 oh.close()
 
-            time.sleep(60)
+            time.sleep(5)
 
     def write_in_file(self, fout, head, msg):
         fout.write(head)
@@ -88,5 +92,7 @@ class CoWin_alerts:
 
 
 if __name__ == '__main__':
-    obj = CoWin_alerts()
-    obj.work()
+    # obj = CoWin_alerts()
+    # obj.work()
+    n = Notifier()
+    n.notify("Hi Pandey ji!", "Slots at BARC available!!")
