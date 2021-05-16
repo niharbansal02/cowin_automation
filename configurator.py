@@ -19,7 +19,7 @@ def buttonClicked():
     print("Thank you!")
     config = {
         'pin': pin.get(),
-        'linux__win': os.get()
+        'linux_win': os.get()
     }
 
     jsonDump = json.dumps(config, indent=2)
