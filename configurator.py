@@ -2,6 +2,7 @@ import tkinter as tk
 from tkinter import ttk
 from tkinter.constants import E, W
 import json
+import os, pathlib
 
 # root
 
@@ -13,17 +14,20 @@ root.title('CoWin Notification Alerts Configurator')
 root.columnconfigure(0, weight = 1)
 
 pin = tk.StringVar()
-os = tk.StringVar()
+osVar = tk.StringVar()
 
 def buttonClicked():
     print("Thank you!")
     config = {
         'pin': pin.get(),
-        'linux_win': os.get()
+        'linux_win': osVar.get()
     }
+    
+    projectPath = pathlib.Path(__file__).parent.parent.absolute()
+    dumpPath = os.path.join(projectPath, "helper/config.json")
 
     jsonDump = json.dumps(config, indent=2)
-    oh = open('config.json', 'w')
+    oh = open(dumpPath, 'w')
     oh.write(jsonDump)
 
     exit()
@@ -42,12 +46,12 @@ pinEntry.grid(column=2, row=0, sticky=tk.E, padx=10, pady=5)
 pinEntry.focus()
 
 # OS
-osLabel = tk.Label(form, text='OS?')
+osLabel = tk.Label(form, text='OS')
 osLabel.grid(column=1, row=1, sticky=tk.W, padx=5, pady=5)
 
-r1 = ttk.Radiobutton(form, text='Linux-based OS', value='linux', variable=os)
+r1 = ttk.Radiobutton(form, text='Linux-based OS', value='linux', variable=osVar)
 r1.grid(column=2, row=1)
-r1 = ttk.Radiobutton(form, text='Windows', value='win', variable=os)
+r1 = ttk.Radiobutton(form, text='Windows', value='win', variable=osVar)
 r1.grid(column=3, row=1)
 
 # Submit

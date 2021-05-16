@@ -1,21 +1,24 @@
 import urllib.request, urllib.parse, urllib.request
-import os, time
+import os, time, pathlib
 import json
 import datetime
-from notifier import Notifier
+from helper.notifier import Notifier
 
 class CoWin_alerts:
     test_dates = []
     config_data = {}
+    projectPath = ""
 
     def __init__(self):
         date_1 = datetime.datetime.now().strftime("%d-%m-%Y")
         date_2 = (datetime.datetime.now() + datetime.timedelta(days=1)).strftime("%d-%m-%Y")
         date_3 = (datetime.datetime.now() + datetime.timedelta(days=2)).strftime("%d-%m-%Y")
         self.test_dates = [date_1, date_2, date_3]
-        with open('config.json') as fh:
+
+        self.projectPath = pathlib.Path(__file__).parent.absolute()
+        print(self.projectPath)
+        with open(os.path.join(self.projectPath, "helper/config.json")) as fh:
             self.config_data = json.loads(fh.read())
-        # print(self.config_data)
 
     def request_data(self, date):
         service_url = "https://cdn-api.co-vin.in/api/v2/appointment/sessions/public/calendarByPin?"
@@ -81,7 +84,7 @@ class CoWin_alerts:
 
                 oh.close()
 
-            time.sleep(5)
+            time.sleep(30)
 
     def write_in_file(self, fout, head, msg):
         fout.write(head)
@@ -92,7 +95,7 @@ class CoWin_alerts:
 
 
 if __name__ == '__main__':
-    # obj = CoWin_alerts()
-    # obj.work()
-    n = Notifier()
-    n.notify("Hi Pandey ji!", "Slots at BARC available!!")
+    obj = CoWin_alerts()
+    obj.work()
+    # n = Notifier()
+    # n.notify("Hi Pandey ji!", "Slots at BARC available!!")
