@@ -50,7 +50,6 @@ r1.grid(column=2, row=1)
 r1 = ttk.Radiobutton(form, text='Windows', value='win', variable=os)
 r1.grid(column=3, row=1)
 
-print(os)
 # Submit
 submitButton = tk.Button(form, text="Submit", command=buttonClicked)
 submitButton.grid(column=2, row=3, padx=5, pady=20)
