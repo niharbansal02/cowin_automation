@@ -1,4 +1,5 @@
 import json
+from os import path
 from pynotifier import Notification
 import pathlib, os
 import playsound
@@ -15,9 +16,11 @@ class Notifier:
 
     def __init__(self):
         self.projectPath = pathlib.Path(__file__).parent.parent.absolute()
-        self.soundPath = os.path.join(self.projectPath, "Resources/alert.wav")
+        p = pathlib.PurePath("Resources/alert.wav")
+        self.soundPath = os.path.join(self.projectPath, p)
 
-        with open(os.path.join(self.projectPath, "helper/config.json")) as fh:
+        p = pathlib.PurePath("helper/config.json")
+        with open(os.path.join(self.projectPath, p)) as fh:
             self.config_data = json.loads(fh.read())
 
     def notify(self, head, msg):
@@ -28,18 +31,21 @@ class Notifier:
 
     def win_notify(self, head, msg):
         toast = ToastNotifier()
-        toast.show_toast(head, msg, duration=20, icon_path=os.path.join(self.projectPath, "Resources/syringe.ico"))
+        p = pathlib.PurePath("Resources/syringe.ico")
+        toast.show_toast(head, msg, duration=20, icon_path=os.path.join(self.projectPath, p))
         playsound.playsound(self.soundPath)
         playsound.playsound(self.soundPath)
 
     def linux_notify(self, head, msg):
         current = pathlib.Path(__file__).parent.absolute()
 
+        p = pathlib.PurePath("Resources/syringe.png")
+
         Notification(
             title=head,
             description=msg,
             duration=5,  
-            icon_path=os.path.join(self.projectPath, "Resources/syringe.png"),
+            icon_path=os.path.join(self.projectPath, p),
             urgency='critical'
         ).send()
 

@@ -42,7 +42,9 @@ def buttonClicked():
             print("Windows\033[0m")
 
     projectPath = pathlib.Path(__file__).parent.parent.absolute()
-    dumpPath = os.path.join(projectPath, "helper/config.json")
+    p = pathlib.PurePath("helper/config.json")
+    dumpPath = os.path.join(projectPath, p)
+    # print(dumpPath)
 
     jsonDump = json.dumps(config, indent=2)
     oh = open(dumpPath, 'w')

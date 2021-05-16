@@ -16,7 +16,8 @@ class CoWin_alerts:
         self.test_dates = [date_1, date_2, date_3]
 
         self.projectPath = pathlib.Path(__file__).parent.absolute()
-        with open(os.path.join(self.projectPath, "helper/config.json")) as fh:
+        p = pathlib.PurePath("helper/config.json")
+        with open(os.path.join(self.projectPath, p)) as fh:
             self.config_data = json.loads(fh.read())
 
     def request_data(self, date):
