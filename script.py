@@ -70,8 +70,8 @@ class CoWin_alerts:
                     vaccine = center['sessions'][0]['vaccine']
 
 
-                    if(availability == 0):      # Just for testing
-                    # if(availability > 0):
+                    # if(availability == 0):      # Just for testing
+                    if(availability > 0):
                         notifObj = Notifier()
                         notifObj.notify("!! Slot Available !!", name)
 
