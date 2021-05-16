@@ -97,5 +97,3 @@ class CoWin_alerts:
 if __name__ == '__main__':
     obj = CoWin_alerts()
     obj.work()
-    # n = Notifier()
-    # n.notify("Hi Pandey ji!", "Slots at BARC available!!")
