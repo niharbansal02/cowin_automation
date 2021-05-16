@@ -16,7 +16,6 @@ class CoWin_alerts:
         self.test_dates = [date_1, date_2, date_3]
 
         self.projectPath = pathlib.Path(__file__).parent.absolute()
-        print(self.projectPath)
         with open(os.path.join(self.projectPath, "helper/config.json")) as fh:
             self.config_data = json.loads(fh.read())
 
@@ -45,12 +44,12 @@ class CoWin_alerts:
             # time.sleep(5)
 
             for test_date in self.test_dates:
-                print(test_date)
+                # print(test_date)
                 try:
                     jsonStr = self.request_data(test_date)
                     json_data = json.loads(jsonStr)
                 except:
-                    print("HTTP 403: It's not me, it's the Government")
+                    print("\033[0;31mHTTP 403 Error\033[0m: It's not me, it's the Government. Please be patient.")
                     continue
 
                 try:
