@@ -6,4 +6,4 @@ json.json
 further_devs.py
 __pycache__
 temp.py
-config.json
+helper/config.json

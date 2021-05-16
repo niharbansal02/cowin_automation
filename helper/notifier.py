@@ -28,7 +28,7 @@ class Notifier:
 
     def win_notify(self, head, msg):
         toast = ToastNotifier()
-        toast.show_toast(head, msg, duration=20, icon_path=os.path.join(self.projectPath, "Resources/syringe.png"))
+        toast.show_toast(head, msg, duration=20, icon_path=os.path.join(self.projectPath, "Resources/syringe.ico"))
         playsound.playsound(self.soundPath)
         playsound.playsound(self.soundPath)
 
