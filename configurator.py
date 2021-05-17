@@ -1,79 +1,111 @@
 import time
 import tkinter as tk
-from tkinter import ttk
+from tkinter import Event, ttk
 from tkinter.constants import E, W
 import json
 import os, pathlib
 
 # root
+#TODO: Add option for Age
+class GUI:
+    root = tk.Tk()
+    # pin = tk.StringVar()
+    # osVar = tk.StringVar()
+    vars = []
 
-root = tk.Tk()
-root.geometry('400x200')
-root.resizable(0, 0)
-root.title('CoWin Notification Alerts Configurator')
+    def __init__(self, title, size, resizable_x = 0, resizable_y = 0) -> None:
+        self.root.geometry(size)
+        self.root.resizable(0, 0)
+        self.root.title(title)
+        self.root.resizable(resizable_x, resizable_y)
+        self.root.columnconfigure(0, weight = 1)
 
-root.columnconfigure(0, weight = 1)
+    def createFrane(self, name):
+        newFrame = ttk.Frame(name)
+        newFrame.pack(padx=10, pady=10, fill='x', expand=True)
+        return newFrame
 
-pin = tk.StringVar()
-osVar = tk.StringVar()
+    def createEntryField(self, frame, label, x, y, variable):
+        fieldLabel = tk.Label(frame, text=label)
+        fieldLabel.grid(column=x, row=y, sticky=tk.W, padx=5, pady=5)
 
-form = ttk.Frame(root)
-form.pack(padx=10, pady=10, fill='x', expand=True)
+        fieldEntry = tk.Entry(frame, textvariable=variable)
+        fieldEntry.grid(column=x + 1, row=y, sticky=tk.E, padx=10, pady=5)
+        
+        self.vars.append(variable)
 
-def buttonClicked():
-    config = {
-        'pin': pin.get(),
-        'linux_win': osVar.get()
-    }
+        return (fieldLabel, fieldEntry)
 
-    if(not pin.get() or not osVar.get()):
-        if(not pin.get()):
-            print("\033[0;31mPin Code not entered.\033[0m")
-        if(not osVar.get()):
-            print("\033[0;31mOS not entered.\033[0m")
-        print("\033[1;31mConfiguration unsuccessful.\033[0m")
-        exit()
-    else:
-        print("\033[1;32mConfiguration Successful.\033[0m")
-        print("Your pincode is \033[1;33m",  pin.get(), "\033[0mand you are on a \033[1;33m", end="")
-        if(config['linux_win'] == 'linux'):
-            print("Linux-based System\033[0m")
+    def createLabel(self, frame, label, x, y):
+        fieldLabel = tk.Label(frame, text=label)
+        fieldLabel.grid(column=x, row=y, sticky=(tk.E, tk.W), padx=10, pady=5)
+
+        return fieldLabel
+
+    def createRadioField(self, frame, label, options, x, y, variable):
+        fieldLabel = tk.Label(frame, text=label)
+        fieldLabel.grid(column=x, row=y, sticky=tk.W, padx=5, pady=5)
+
+        radioButtons = []
+        posDelta = 0
+        for option in options:
+            posDelta += 1
+            r = tk.Radiobutton(frame, text=option[0], value=option[1], variable=variable)
+            r.grid(column=x + posDelta, row=y)
+            radioButtons.append(r)
+
+        self.vars.append(variable)
+
+        return (fieldLabel, radioButtons)
+
+    def createButton(self, frame, label, x, y, function):
+        bton = tk.Button(frame, text=label, command=lambda: function(frame))
+        bton.grid(column= x, row=y, padx=5, pady=20)
+        return bton
+
+    def submitButtonClicked(self, frame):
+        config = {
+            'pin': self.vars[0].get(),
+            'linux_win': self.vars[1].get()
+        }
+
+        if(not config['pin'] or not config['linux_win']):
+            if(not config['pin'] and not config['linux_win']):
+                self.createLabel(frame, "Pin not entered and OS not selected", 2, 2)
+            elif(not config['pin']):
+                self.createLabel(frame, "Pin not entered", 2, 2)
+            else:
+                self.createLabel(frame, "OS not selected", 2, 2)
+        elif(len(config['pin']) != 6):
+            self.createLabel(frame, "Mind checking the pincode once again?", 2, 2)
         else:
-            print("Windows\033[0m")
+            self.createLabel(frame, "Thank you for configuring me. Exiting..", 2, 2)
+            self.root.after(1000, lambda: exit())
 
-    projectPath = pathlib.Path(__file__).parent.parent.absolute()
-    dumpPath = pathlib.PurePath("helper/config.json")
-    # print(dumpPath)
+        dumpPath = pathlib.PurePath("helper/config.json")
 
-    jsonDump = json.dumps(config, indent=2)
-    oh = open(dumpPath, 'w')
-    oh.write(jsonDump)
-
-    exit()
-
-
-# Pin code
-pinLabel = tk.Label(form, text='Your Pincode')
-pinLabel.grid(column=1, row=0, sticky=tk.W, padx=5, pady=5)
-
-pinEntry = tk.Entry(form, textvariable=pin)
-pinEntry.grid(column=2, row=0, sticky=tk.E, padx=10, pady=5)
-pinEntry.focus()
-
-# OS
-osLabel = tk.Label(form, text='OS')
-osLabel.grid(column=1, row=1, sticky=tk.W, padx=5, pady=5)
-
-r1 = ttk.Radiobutton(form, text='Linux-based OS', value='linux', variable=osVar)
-r1.grid(column=2, row=1)
-r1 = ttk.Radiobutton(form, text='Windows', value='win', variable=osVar)
-r1.grid(column=3, row=1)
-
-# Submit
-submitButton = tk.Button(form, text="Submit", command=buttonClicked)
-submitButton.grid(column=2, row=4, padx=5, pady=20)
+        jsonDump = json.dumps(config)
+        with open(dumpPath, 'w') as oh:
+            oh.write(jsonDump)
 
 
 
+if __name__ == '__main__':
+    window = GUI("CoWin Notifier Configurator", '500x200', 0, 0)
+    form = window.createFrane(window.root)
+    responseVar = []
 
-root.mainloop()
+    # Pin Field
+    pin = tk.StringVar()
+    (pinLabel, pinEntry) = window.createEntryField(form, "Pincode", 1, 0, pin)
+    pinEntry.focus()
+    
+    # OS Field
+    osVar = tk.StringVar()
+    osOptions = [("Linux-Based OS", "linux"), ("Windows", "win")]
+    (osLabel, osRadio) = window.createRadioField(form, "OS", osOptions, 1, 1, osVar)
+
+    # Submit Button
+    submitButton = window.createButton(form, "Submit", 2, 3, window.submitButtonClicked)
+
+    window.root.mainloop()
