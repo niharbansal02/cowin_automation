@@ -57,34 +57,58 @@ class GUI:
         self.vars.append(variable)
 
         return (fieldLabel, radioButtons)
+    
+    def createCheckboxField(self, frame, label, options, x, y):
+        fieldLabel = tk.Label(frame, text=label)
+        fieldLabel.grid(column=x, row=y, sticky=tk.W, padx=5, pady=5)
+
+        chkVar = []
+        chkBoxes = []
+        posDelta = 0
+        for option in options:
+            var = tk.IntVar()
+            posDelta += 1
+            ch = tk.Checkbutton(frame, text=option, variable=var)
+            ch.grid(column=x + posDelta, row=y)
+            chkBoxes.append(ch)
+            chkVar.append(var)
+        
+        self.vars.append(chkVar)
+
+        return (fieldLabel, chkBoxes)
 
     def createButton(self, frame, label, x, y, function):
-        bton = tk.Button(frame, text=label, command=lambda: function(frame))
+        bton = tk.Button(frame, text=label, command=lambda: function(frame, x, y))
         bton.grid(column= x, row=y, padx=5, pady=20)
         return bton
 
-    def submitButtonClicked(self, frame):
+    def submitButtonClicked(self, frame, x, y):
         config = {
             'pin': self.vars[0].get(),
-            'linux_win': self.vars[1].get()
+            'linux_win': self.vars[1].get(),
+            '18+': self.vars[2][0].get(),
+            '45+': self.vars[2][1].get()
         }
 
-        if(not config['pin'] or not config['linux_win']):
-            if(not config['pin'] and not config['linux_win']):
-                self.createLabel(frame, "Pin not entered and OS not selected", 2, 2)
+        if(not config['pin'] or not config['linux_win'] or not (config['18+'] or config['45+'])):
+            if(not config['pin'] and not config['linux_win'] and not (config['18+'] and config['45+'])):
+                self.createLabel(frame, "Pin, OS, Age group missing", x, y - 1)
             elif(not config['pin']):
-                self.createLabel(frame, "Pin not entered", 2, 2)
+                self.createLabel(frame, "Pin not entered", x, y - 1)
+            elif(not config['linux_win']):
+                self.createLabel(frame, "OS not selected", x, y - 1)
             else:
-                self.createLabel(frame, "OS not selected", 2, 2)
+                self.createLabel(frame, "Age group not specified", x, y - 1)
         elif(len(config['pin']) != 6):
-            self.createLabel(frame, "Mind checking the pincode once again?", 2, 2)
+            self.createLabel(frame, "Mind checking the pincode once again?", x, y - 1)
         else:
-            self.createLabel(frame, "Thank you for configuring me. Exiting..", 2, 2)
+            self.createLabel(frame, "Thank you for configuring me. Exiting..", x, y - 1)
             self.root.after(1000, lambda: exit())
 
         dumpPath = pathlib.PurePath("helper/config.json")
 
         jsonDump = json.dumps(config)
+        # print(jsonDump)
         with open(dumpPath, 'w') as oh:
             oh.write(jsonDump)
 
@@ -105,7 +129,12 @@ if __name__ == '__main__':
     osOptions = [("Linux-Based OS", "linux"), ("Windows", "win")]
     (osLabel, osRadio) = window.createRadioField(form, "OS", osOptions, 1, 1, osVar)
 
+    # Age Field
+    ageVars = [tk.IntVar(), tk.IntVar()]
+    ageOptions = ["18 - 44", "45+"]
+    (ageLabel, ageBoxes) = window.createCheckboxField(form, "Age Group", ageOptions, 1, 2)
+
     # Submit Button
-    submitButton = window.createButton(form, "Submit", 2, 3, window.submitButtonClicked)
+    submitButton = window.createButton(form, "Submit", 2, 4, window.submitButtonClicked)
 
     window.root.mainloop()

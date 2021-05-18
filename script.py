@@ -44,13 +44,14 @@ class CoWin_alerts:
             # if(not cont):break
             # time.sleep(5)
 
+            #TODO: Verify request for age criteria
             for test_date in self.test_dates:
                 # print(test_date)
                 try:
                     jsonStr = self.request_data(test_date)
                     json_data = json.loads(jsonStr)
                 except:
-                    print("\033[0;31mHTTP 403 Error\033[0m: It's not me, it's the Government. Please be patient.")
+                    print("\033[0;31mHTTP 403 Error\033[0m:", datetime.datetime.now().strftime("%H:%M"), "It's not me, it's the Government. Please be patient.")
                     continue
 
                 try:
@@ -69,12 +70,23 @@ class CoWin_alerts:
                     date = center['sessions'][0]['date']
                     availability = center['sessions'][0]['available_capacity']
                     vaccine = center['sessions'][0]['vaccine']
-
+                    notifyAge = False
+                    if(self.config_data['18+'] == 1 and min_age == 18):
+                        notifyAge = True
+                    if(self.config_data['45+'] == 1 and min_age == 45):
+                        notifyAge = True
 
                     # if(availability == 0):      # Just for testing
-                    if(availability > 0):
+                    if(availability > 1 and notifyAge):
                         notifObj = Notifier()
                         notifObj.notify("!! Slot Available !!", name)
+                        with open("timelogs.txt", 'a+') as th:
+                        	th.write(self.test_dates[0])
+                        	th.write("\t")
+                        	th.write(datetime.datetime.now().strftime("%H:%M"))
+                        	th.write("\t")
+                        	th.write(name)
+                        	th.write("\n")
 
                     self.write_in_file(oh, "Center Name", name)
                     self.write_in_file(oh, "Availability", str(availability))
