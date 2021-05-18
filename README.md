@@ -11,8 +11,8 @@ Sends you a notification on your desktop if slots are available near you.
 
 ## Configuration
 -   Run the following on a command line \
-    ```$ python configurator.py```
-    Enter your desired pincode, and choose your OS.
+    ```$ python configurator.py``` \
+    Enter your desired **pincode**, choose your **OS**, and the **age group** you wish to get notified for.
 
 
 ## Run
