@@ -1,7 +1,7 @@
 import time
 import tkinter as tk
 from tkinter import Event, ttk
-from tkinter.constants import E, W
+from tkinter.constants import E, RADIOBUTTON, W
 import json
 import os, pathlib
 
@@ -58,6 +58,13 @@ class GUI:
 
         return (fieldLabel, radioButtons)
     
+    def pins_validity(self, pins_list):
+        for pin in pins_list:
+            if(len(pin) != 6):
+                return False
+        
+        return True
+
     def createCheckboxField(self, frame, label, options, x, y):
         fieldLabel = tk.Label(frame, text=label)
         fieldLabel.grid(column=x, row=y, sticky=tk.W, padx=5, pady=5)
@@ -90,6 +97,11 @@ class GUI:
             '45+': self.vars[2][1].get()
         }
 
+        pins_list = []
+        for pin in config['pin'].split(","):
+            pins_list.append(pin.strip())
+        config['pin'] = pins_list
+
         if(not config['pin'] or not config['linux_win'] or not (config['18+'] or config['45+'])):
             if(not config['pin'] and not config['linux_win'] and not (config['18+'] and config['45+'])):
                 self.createLabel(frame, "Pin, OS, Age group missing", x, y - 1)
@@ -99,8 +111,8 @@ class GUI:
                 self.createLabel(frame, "OS not selected", x, y - 1)
             else:
                 self.createLabel(frame, "Age group not specified", x, y - 1)
-        elif(len(config['pin']) != 6):
-            self.createLabel(frame, "Mind checking the pincode once again?", x, y - 1)
+        elif(not self.pins_validity(config['pin'])):
+            self.createLabel(frame, "Mind checking pin-code once again?", x, y - 1)
         else:
             self.createLabel(frame, "Thank you for configuring me. Exiting..", x, y - 1)
             self.root.after(1000, lambda: exit())
@@ -115,13 +127,13 @@ class GUI:
 
 
 if __name__ == '__main__':
-    window = GUI("CoWin Notifier Configurator", '500x200', 0, 0)
+    window = GUI("CoWin Notifier Configurator", '600x200', 1, 1)
     form = window.createFrane(window.root)
     responseVar = []
 
     # Pin Field
     pin = tk.StringVar()
-    (pinLabel, pinEntry) = window.createEntryField(form, "Pincode", 1, 0, pin)
+    (pinLabel, pinEntry) = window.createEntryField(form, "Pincodes (Separated by comma)", 1, 0, pin)
     pinEntry.focus()
     
     # OS Field

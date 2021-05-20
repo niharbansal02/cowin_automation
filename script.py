@@ -20,10 +20,10 @@ class CoWin_alerts:
         with open(os.path.join(self.projectPath, p)) as fh:
             self.config_data = json.loads(fh.read())
 
-    def request_data(self, date):
+    def request_data(self, date, pin):
         service_url = "https://cdn-api.co-vin.in/api/v2/appointment/sessions/public/calendarByPin?"
         params = {
-            'pincode': self.config_data['pin'],
+            'pincode': pin,
             'date': date
         }
 
@@ -44,57 +44,58 @@ class CoWin_alerts:
             # if(not cont):break
             # time.sleep(5)
 
-            #TODO: Verify request for age criteria
             for test_date in self.test_dates:
                 # print(test_date)
-                try:
-                    jsonStr = self.request_data(test_date)
-                    json_data = json.loads(jsonStr)
-                except:
-                    print("\033[0;31mHTTP 403 Error\033[0m:", datetime.datetime.now().strftime("%H:%M"), "It's not me, it's the Government. Please be patient.")
-                    continue
+                for pin in self.config_data['pin']:
+                    try:
+                        jsonStr = self.request_data(test_date, pin)
+                        json_data = json.loads(jsonStr)
+                    except:
+                        print("\033[0;31mHTTP 403 Error\033[0m:", datetime.datetime.now().strftime("%H:%M"), "It's not me, it's the Government. Please be patient.")
+                        continue
 
-                try:
-                    aux_var = (json_data['centers'][0])
-                except:
-                    continue
+                    try:
+                        aux_var = (json_data['centers'][0])
+                    except:
+                        continue
 
-                oh = open('data.txt', 'w')
+                    oh = open('data.txt', 'w')
 
-                for center in json_data['centers']:
-                    name = center['name']
-                    city = center['district_name']
-                    pin = center['pincode']
-                    fee_type = center['fee_type']
-                    min_age = center['sessions'][0]['min_age_limit']
-                    date = center['sessions'][0]['date']
-                    availability = center['sessions'][0]['available_capacity']
-                    vaccine = center['sessions'][0]['vaccine']
-                    notifyAge = False
-                    if(self.config_data['18+'] == 1 and min_age == 18):
-                        notifyAge = True
-                    if(self.config_data['45+'] == 1 and min_age == 45):
-                        notifyAge = True
+                    for center in json_data['centers']:
+                        name = center['name']
+                        city = center['district_name']
+                        pin = center['pincode']
+                        fee_type = center['fee_type']
+                        min_age = center['sessions'][0]['min_age_limit']
+                        date = center['sessions'][0]['date']
+                        availability = center['sessions'][0]['available_capacity']
+                        vaccine = center['sessions'][0]['vaccine']
+                        notifyAge = False
+                        if(self.config_data['18+'] == 1 and min_age == 18):
+                            notifyAge = True
+                        if(self.config_data['45+'] == 1 and min_age == 45):
+                            notifyAge = True
 
-                    # if(availability == 0):      # Just for testing
-                    if(availability > 1 and notifyAge):
-                        notifObj = Notifier()
-                        notifObj.notify("!! Slot Available !!", name)
-                        with open("timelogs.txt", 'a+') as th:
-                        	th.write(self.test_dates[0])
-                        	th.write("\t")
-                        	th.write(datetime.datetime.now().strftime("%H:%M"))
-                        	th.write("\t")
-                        	th.write(name)
-                        	th.write("\n")
+                        # if(availability == 0 and notifyAge):      # Just for testing
+                        if(availability > 1 and notifyAge):
+                            notifObj = Notifier()
+                            notifStr = "!! Slots Available for " + str(pin) + " !!"
+                            notifObj.notify(notifStr, name)
+                            with open("timelogs.txt", 'a+') as th:
+                                th.write(self.test_dates[0])
+                                th.write("\t")
+                                th.write(datetime.datetime.now().strftime("%H:%M"))
+                                th.write("\t")
+                                th.write(name)
+                                th.write("\n")
 
-                    self.write_in_file(oh, "Center Name", name)
-                    self.write_in_file(oh, "Availability", str(availability))
-                    self.write_in_file(oh, "Date", date)
-                    self.write_in_file(oh, "Vaccine", vaccine)
-                    self.write_in_file(oh, "Min Age", str(min_age))
+                        self.write_in_file(oh, "Center Name", name)
+                        self.write_in_file(oh, "Availability", str(availability))
+                        self.write_in_file(oh, "Date", date)
+                        self.write_in_file(oh, "Vaccine", vaccine)
+                        self.write_in_file(oh, "Min Age", str(min_age))
 
-                oh.close()
+                    oh.close()
 
             time.sleep(30)
 
