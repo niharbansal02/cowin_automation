@@ -1,9 +1,10 @@
 import time
 import tkinter as tk
-from tkinter import Event, ttk
+from tkinter import DoubleVar, Event, Variable, ttk
 from tkinter.constants import E, RADIOBUTTON, W
 import json
 import os, pathlib
+import requests
 
 # root
 #TODO: Add option for Age
@@ -11,7 +12,7 @@ class GUI:
     root = tk.Tk()
     # pin = tk.StringVar()
     # osVar = tk.StringVar()
-    vars = []
+    vars = {}
 
     def __init__(self, title, size, resizable_x = 0, resizable_y = 0) -> None:
         self.root.geometry(size)
@@ -25,24 +26,24 @@ class GUI:
         newFrame.pack(padx=10, pady=10, fill='x', expand=True)
         return newFrame
 
-    def createEntryField(self, frame, label, x, y, variable):
+    def createEntryField(self, frame, label, x, y, variable, alias = None):
         fieldLabel = tk.Label(frame, text=label)
         fieldLabel.grid(column=x, row=y, sticky=tk.W, padx=5, pady=5)
 
         fieldEntry = tk.Entry(frame, textvariable=variable)
         fieldEntry.grid(column=x + 1, row=y, sticky=tk.E, padx=10, pady=5)
         
-        self.vars.append(variable)
+        self.vars[alias] = variable
 
         return (fieldLabel, fieldEntry)
 
-    def createLabel(self, frame, label, x, y):
+    def createLabel(self, frame, label, x, y, alias = None):
         fieldLabel = tk.Label(frame, text=label)
         fieldLabel.grid(column=x, row=y, sticky=(tk.E, tk.W), padx=10, pady=5)
 
         return fieldLabel
 
-    def createRadioField(self, frame, label, options, x, y, variable):
+    def createRadioField(self, frame, label, options, x, y, variable, func = None, alias = None):
         fieldLabel = tk.Label(frame, text=label)
         fieldLabel.grid(column=x, row=y, sticky=tk.W, padx=5, pady=5)
 
@@ -50,11 +51,11 @@ class GUI:
         posDelta = 0
         for option in options:
             posDelta += 1
-            r = tk.Radiobutton(frame, text=option[0], value=option[1], variable=variable)
+            r = tk.Radiobutton(frame, text=option[0], value=option[1], variable=variable, command=func)
             r.grid(column=x + posDelta, row=y)
             radioButtons.append(r)
-
-        self.vars.append(variable)
+        
+        self.vars[alias] = variable
 
         return (fieldLabel, radioButtons)
     
@@ -65,7 +66,7 @@ class GUI:
         
         return True
 
-    def createCheckboxField(self, frame, label, options, x, y):
+    def createCheckboxField(self, frame, label, options, x, y, alias = None):
         fieldLabel = tk.Label(frame, text=label)
         fieldLabel.grid(column=x, row=y, sticky=tk.W, padx=5, pady=5)
 
@@ -80,9 +81,21 @@ class GUI:
             chkBoxes.append(ch)
             chkVar.append(var)
         
-        self.vars.append(chkVar)
+        self.vars[alias] = chkVar
 
         return (fieldLabel, chkBoxes)
+
+    def createDropDown(self, frame, label, var, values, x, y, alias = None):
+        fieldLabel = tk.Label(frame, text=label)
+        fieldLabel.grid(column=x, row=y, sticky=tk.W, padx=5, pady=5)
+
+        dropDown = ttk.Combobox(frame, textvariable=var, values=values)
+        dropDown.grid(column=x + 1, row=y, sticky=tk.W, padx=5, pady=5)
+        dropDown.current(1)
+
+        self.vars[alias] = vars
+
+        return var, dropDown
 
     def createButton(self, frame, label, x, y, function):
         bton = tk.Button(frame, text=label, command=lambda: function(frame, x, y))
@@ -91,11 +104,14 @@ class GUI:
 
     def submitButtonClicked(self, frame, x, y):
         config = {
-            'pin': self.vars[0].get(),
-            'linux_win': self.vars[1].get(),
-            '18+': self.vars[2][0].get(),
-            '45+': self.vars[2][1].get()
+            'pin': self.vars["pin"].get(),
+            'linux_win': self.vars["os"].get(),
+            '18+': self.vars["ageListBool"][0].get(),
+            '45+': self.vars["ageListBool"][1].get(),
+            'dose': self.vars["dose"].get()
         }
+
+        # print(json.dumps(config, indent=4))
 
         pins_list = []
         for pin in config['pin'].split(","):
@@ -124,29 +140,105 @@ class GUI:
         with open(dumpPath, 'w') as oh:
             oh.write(jsonDump)
 
+def decider(pin_dist, window, el1, el2):
+    if(pin_dist == "pin"):
+        byPin(window)
+    else:
+        byDist(window)
+        pass
 
+def byPin(window):
+    # Pin Field
+    pin = tk.StringVar()
+    (pinLabel, pinEntry) = window.createEntryField(form, "Pincodes (Separated by comma)", 1, 4, pin, "pin")
+    pinEntry.focus()
+    
+    # Submit Button
+    submitButton = window.createButton(form, "Submit", 2, 6, window.submitButtonClicked)
+
+def byDist(window):
+    states_URL = "https://cdn-api.co-vin.in/api/v2/admin/location/states"
+
+    hdr = {
+            'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.95 Safari/537.36',
+            'accept': 'application/json',
+            'Accept-Language': 'en_US'
+    }
+
+    response = requests.get(states_URL, headers=hdr)
+    jsonDump = response.text
+    JSON = json.loads(jsonDump)
+    stateList = []
+    stateNameList = []
+    stateDict = {}
+    for state in JSON["states"]:
+        stateList.append((state["state_id"], state["state_name"]))
+        stateNameList.append(state["state_name"])
+        stateDict[state["state_name"]] = state["state_id"]
+
+    # DropDown
+    state = tk.StringVar()
+    state, drpDown = window.createDropDown(form, "State", state, stateNameList, 1, 3)
+
+    drpDown.bind("<<ComboboxSelected>>", lambda event: disctrict(event, stateDict[state.get()], window))
+
+def disctrict(event, stateID, frame):
+    print(stateID)
+
+    disctrictURL = "https://cdn-api.co-vin.in/api/v2/admin/location/districts/" + str(stateID)
+
+    hdr = {
+            'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.95 Safari/537.36',
+            'accept': 'application/json',
+            'Accept-Language': 'en_US'
+    }
+
+    response = requests.get(disctrictURL, headers=hdr)
+    jsonDump = response.text
+    JSON = json.loads(jsonDump)
+    distList = []
+    distNameList = []
+    distDict = {}
+    for state in JSON["districts"]:
+        distList.append((state["district_id"], state["district_name"]))
+        distNameList.append(state["district_name"])
+        distDict[state["district_name"]] = state["district_id"]
+
+    # District DropDown
+    dist = tk.StringVar()
+    dist, drpDown = frame.createDropDown(form, "District", dist, distNameList, 1, 4)
+
+    drpDown.bind("<<ComboboxSelected>>", lambda event: dist(event, print(dist)))
+
+
+#TODO: Alias in byDist(), and restructure it
 
 if __name__ == '__main__':
-    window = GUI("CoWin Notifier Configurator", '600x200', 1, 1)
+    window = GUI("CoWin Notifier Configurator", '600x400', 1, 1)
     form = window.createFrane(window.root)
     responseVar = []
 
-    # Pin Field
-    pin = tk.StringVar()
-    (pinLabel, pinEntry) = window.createEntryField(form, "Pincodes (Separated by comma)", 1, 0, pin)
-    pinEntry.focus()
-    
     # OS Field
     osVar = tk.StringVar()
     osOptions = [("Linux-Based OS", "linux"), ("Windows", "win")]
-    (osLabel, osRadio) = window.createRadioField(form, "OS", osOptions, 1, 1, osVar)
+    (osLabel, osRadio) = window.createRadioField(form, "OS", osOptions, 1, 0, osVar, None, "os")
+
+    # Dose Field
+    doseVar = tk.StringVar()
+    doseOptions = [("Dose 1", "d1"), ("Dose 2", "d2")]
+    (doseLabel, doseRadio) = window.createRadioField(form, "Dose", doseOptions, 1, 1, doseVar, None, "dose")
+
 
     # Age Field
     ageVars = [tk.IntVar(), tk.IntVar()]
     ageOptions = ["18 - 44", "45+"]
-    (ageLabel, ageBoxes) = window.createCheckboxField(form, "Age Group", ageOptions, 1, 2)
+    (ageLabel, ageBoxes) = window.createCheckboxField(form, "Age Group", ageOptions, 1, 2, "ageListBool")
 
-    # Submit Button
-    submitButton = window.createButton(form, "Submit", 2, 4, window.submitButtonClicked)
 
+    # Radio for Pincode/Disctrict
+    loc = tk.StringVar()
+    locOptions = [("Pincode", "pin"), ("Discrict", "district")]
+    (locLabel, locEntry) = window.createRadioField(form, "Search by", locOptions, 1, 3, loc, lambda: decider(loc.get(), window, locLabel, locEntry), "pin_dist")
+
+    print(window.vars)
     window.root.mainloop()

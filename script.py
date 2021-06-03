@@ -20,6 +20,24 @@ class CoWin_alerts:
         with open(os.path.join(self.projectPath, p)) as fh:
             self.config_data = json.loads(fh.read())
 
+        size = str(os.get_terminal_size())
+#        print(size)
+
+        endRange = 50
+        try:
+	        endRange = int(size.split("columns=")[1].split(",")[0]) - 2
+        except:
+    	   	pass
+
+ #       print(endRange)
+
+        print("Retrieving Configuration..")
+        for i in range(1, endRange):
+        	time.sleep(0.05)
+        	print("=", end="", flush=True)
+        print("||")
+        print("Started. You may minimize me, but please keep me live in the background.")
+
     def request_data(self, date, pin):
         service_url = "https://cdn-api.co-vin.in/api/v2/appointment/sessions/public/calendarByPin?"
         params = {
@@ -69,15 +87,24 @@ class CoWin_alerts:
                         min_age = center['sessions'][0]['min_age_limit']
                         date = center['sessions'][0]['date']
                         availability = center['sessions'][0]['available_capacity']
+                        availD1 = center['sessions'][0]['available_capacity_dose1']
+                        availD2 = center['sessions'][0]['available_capacity_dose2']
+                        availCheckFor = ""
                         vaccine = center['sessions'][0]['vaccine']
                         notifyAge = False
+                        
+                        if(self.config_data['dose'] == 'd1'):
+                            availCheckFor = availD1
+                        else:
+                            availCheckFor = availD2
+
                         if(self.config_data['18+'] == 1 and min_age == 18):
                             notifyAge = True
                         if(self.config_data['45+'] == 1 and min_age == 45):
                             notifyAge = True
 
                         # if(availability == 0 and notifyAge):      # Just for testing
-                        if(availability > 1 and notifyAge):
+                        if(availability > 1 and notifyAge and availCheckFor > 0):
                             notifObj = Notifier()
                             notifStr = "!! Slots Available for " + str(pin) + " !!"
                             notifObj.notify(notifStr, name)
